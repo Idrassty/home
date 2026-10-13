@@ -668,8 +668,8 @@ $('callVoice').onclick = () => startCall(false);
 $('callVideo').onclick = () => startCall(true);
 
 /* ---------- push notifications (sent through your free Cloudflare Worker) ---------- */
-const VAPID_KEY  = 'PASTE_YOUR_WEB_PUSH_KEY_HERE';   // Firebase > Project settings > Cloud Messaging > Web Push certificates
-const WORKER_URL = 'PASTE_YOUR_WORKER_URL_HERE';     // e.g. https://chat-push.yourname.workers.dev
+const VAPID_KEY  = BC7gZm4UAZbikxLJU-vWREAfv5qa1rxMUwe9vFJOsB9rk64bD_mqipeIKGO2QatUw-Yn6pMWFinHUqvgpiZUSE8';   // Firebase > Project settings > Cloud Messaging > Web Push certificates
+const WORKER_URL = 'https://home.pokekotkot.workers.dev/';     // e.g. https://chat-push.yourname.workers.dev
 let pushToken = null;
 async function pingWorker(body) {
   if (WORKER_URL.startsWith('PASTE') || !me) return;
