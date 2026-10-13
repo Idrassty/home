@@ -29,7 +29,6 @@ body{background:#eef2f3;color:#333}
 .sidebar{width:76px;background:#2c3e50;display:flex;flex-direction:column;align-items:center;padding-top:16px;gap:10px}
 .tab-btn{background:none;border:none;color:#fff;font-size:26px;cursor:pointer;opacity:.6;padding:10px;width:100%;position:relative}
 .tab-btn.active{opacity:1;background:#34495e;border-left:4px solid #4caf50}
-.tab-btn .dot{position:absolute;top:8px;right:14px;background:#e74c3c;color:#fff;border-radius:10px;font-size:11px;padding:1px 6px}
 .spacer{flex:1}
 .main{flex:1;overflow-y:auto;padding:24px;display:flex;justify-content:center}
 .page{display:none;width:100%;max-width:760px}
@@ -46,8 +45,8 @@ button.pri:hover{background:#439a46}
 button.sec{background:none;border:none;color:#2980b9;cursor:pointer;font-size:13px;margin-top:8px}
 .err{color:#e74c3c;font-size:13px;min-height:18px;margin-bottom:6px}
 
-/* login */
-#login{max-width:380px;margin:60px auto;width:100%}
+/* login card wrapper */
+#loginCardWrap{width:100%;max-width:380px;margin:60px auto}
 
 /* diary */
 .today{background:#4caf50;color:#fff;border-radius:12px;padding:12px;text-align:center;font-weight:700;margin-bottom:16px}
@@ -96,7 +95,6 @@ button.sec{background:none;border:none;color:#2980b9;cursor:pointer;font-size:13
 .tab-btn:hover .lbl{opacity:1}
 </style>
 
-<!-- Firebase SDKs Loaded Properly at the Top -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -105,7 +103,7 @@ button.sec{background:none;border:none;color:#2980b9;cursor:pointer;font-size:13
 <body>
 <div id="banner" hidden></div>
 
-<!-- ============ COVER SCREEN ============ -->
+<!-- COVER -->
 <div id="cover">
   <div class="cover-wrap" id="coverWrap">
     <img src="Study-Study.jpg" alt="Study study" draggable="false" onerror="this.removeAttribute('src');this.style.background='#b2bec3'">
@@ -113,7 +111,7 @@ button.sec{background:none;border:none;color:#2980b9;cursor:pointer;font-size:13
   </div>
 </div>
 
-<!-- ============ APP SHELL ============ -->
+<!-- APP -->
 <div id="app" hidden>
   <div class="sidebar">
     <button class="tab-btn active" data-tab="diary"><span class="ic">📓</span><span class="lbl">Diary</span></button>
@@ -126,19 +124,21 @@ button.sec{background:none;border:none;color:#2980b9;cursor:pointer;font-size:13
   </div>
 
   <div class="main">
-    <!-- LOGIN (Shown when logged out) -->
-    <div id="login" class="card">
-      <h1>🔐 Welcome</h1>
-      <p class="sub">Just a username and password. No email.</p>
-      <input id="u" placeholder="Username (3-20 letters, numbers, _)" autocomplete="username">
-      <input id="p" type="password" placeholder="Password (min 6 characters)" autocomplete="current-password">
-      <div class="err" id="authErr"></div>
-      <button class="pri" id="authBtn">Log in</button>
-      <button class="sec" id="authSwitch">New here? Create an account</button>
+    <!-- LOGIN VIEW -->
+    <div id="loginCardWrap">
+      <div id="login" class="card">
+        <h1>🔐 Welcome</h1>
+        <p class="sub">Just a username and password. No email.</p>
+        <input id="u" placeholder="Username (3-20 letters, numbers, _)" autocomplete="username">
+        <input id="p" type="password" placeholder="Password (min 6 characters)" autocomplete="current-password">
+        <div class="err" id="authErr"></div>
+        <button class="pri" id="authBtn">Log in</button>
+        <button class="sec" id="authSwitch">New here? Create an account</button>
+      </div>
     </div>
 
-    <!-- DIARY (Hidden until logged in) -->
-    <div id="diaryPage" class="page" hidden>
+    <!-- DIARY PAGE -->
+    <div id="diaryPage" class="page">
       <h1>📓 My Private Diary</h1>
       <p class="sub">Only you can read this. Saved to your account.</p>
       <div class="today" id="todayBar"></div>
@@ -150,8 +150,8 @@ button.sec{background:none;border:none;color:#2980b9;cursor:pointer;font-size:13
       <div id="notes"></div>
     </div>
 
-    <!-- CHAT (Hidden until logged in) -->
-    <div id="chatPage" class="page" hidden>
+    <!-- CHAT PAGE -->
+    <div id="chatPage" class="page">
       <h1>💬 Messenger</h1>
       <p class="sub">Signed in as <b id="meName"></b></p>
       <div class="chat-grid" id="chatGrid">
@@ -178,7 +178,6 @@ button.sec{background:none;border:none;color:#2980b9;cursor:pointer;font-size:13
 </div>
 
 <script>
-// Cover screen toggle
 var g = function(i){return document.getElementById(i)};
 function banner(m){var b=g('banner');b.textContent=m;b.hidden=false;}
 var NEED=3, count=0, tm;
@@ -188,7 +187,6 @@ g('bubble').onclick = function(){
 };
 g('lockBtn').onclick = function(){ g('app').hidden=true; g('cover').hidden=false; };
 
-// Theme toggle
 var root = document.documentElement;
 function applyTheme(t){
   root.setAttribute('data-theme', t);
@@ -204,7 +202,6 @@ g('themeBtn').onclick = function(){
   try{localStorage.setItem('theme', t);}catch(e){}
 };
 
-// Tab switching
 document.querySelectorAll('[data-tab]').forEach(function(b){
   b.onclick = function(){
     document.querySelectorAll('[data-tab]').forEach(function(x){x.classList.remove('active')});
@@ -214,7 +211,6 @@ document.querySelectorAll('[data-tab]').forEach(function(b){
   };
 });
 
-// Firebase Initialization & Logic
 const firebaseConfig = {
   apiKey: "AIzaSyCTKpx5ozSXtln0TmjNbzLrCYCoxRn8RnI",
   authDomain: "the-pub---gc.firebaseapp.com",
@@ -240,7 +236,6 @@ const fakeMail = n => n.toLowerCase() + "@myspace-app.local";
 let me = null, myName = "", registering = false;
 let unsubDiary, unsubFriends, unsubMsgs, currentChat = null;
 
-// Auth Switch & Login
 $('authSwitch').onclick = () => {
   registering = !registering;
   $('authBtn').textContent = registering ? 'Create account' : 'Log in';
@@ -270,8 +265,8 @@ $('authBtn').onclick = async () => {
       'auth/invalid-credential': 'Wrong username or password',
       'auth/wrong-password': 'Wrong username or password',
       'auth/user-not-found': 'Wrong username or password',
-      'auth/network-request-failed': 'Cannot reach Firebase login servers. Check network or ad-blockers.',
-      'auth/unauthorized-domain': 'Add this GitHub Pages domain under Firebase Authentication > Settings > Authorized domains'
+      'auth/network-request-failed': 'Cannot reach Firebase servers. Check network/ad-blockers.',
+      'auth/unauthorized-domain': 'Add this domain in Firebase Authentication > Settings > Authorized domains'
     };
     $('authErr').textContent = m[e.code] || e.message;
   }
@@ -279,7 +274,6 @@ $('authBtn').onclick = async () => {
 
 $('logoutBtn').onclick = () => { auth.signOut(); };
 
-// Auth State Monitor (Controls visibility cleanly)
 auth.onAuthStateChanged(user => {
   me = user;
   if(unsubDiary) unsubDiary();
@@ -288,9 +282,10 @@ auth.onAuthStateChanged(user => {
   currentChat = null;
   
   const loggedIn = !!user;
-  $('login').hidden = loggedIn;
-  $('diaryPage.page').hidden = !loggedIn;
-  $('diaryPage').classList.toggle('active', loggedIn);$('logoutBtn').hidden = !loggedIn;
+  $('loginCardWrap').hidden = loggedIn;
+  $('diaryPage').classList.toggle('active', loggedIn);
+  document.querySelectorAll('.page').forEach(p => { if(!loggedIn) p.classList.remove('active'); });
+  $('logoutBtn').hidden = !loggedIn;
   $('notifBtn').hidden = !loggedIn;
 
   if (!loggedIn) return;
@@ -301,7 +296,6 @@ auth.onAuthStateChanged(user => {
   startFriends();
 });
 
-// Diary Functions
 const dayKey = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 const longDay = d => d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 function tickToday() { if($('todayBar'))$('todayBar').textContent = '📅 Today · ' + longDay(new Date()); }
@@ -332,79 +326,4 @@ function startDiary() {
     });
     $('notes').innerHTML = html || '<div class="empty">No entries yet. Write your first one above.</div>';
     $('notes').querySelectorAll('.del').forEach(b => b.onclick = () => {
-      if (confirm('Delete this entry?')) db.collection('users').doc(me.uid).collection('diary').doc(b.dataset.id).delete();
-    });
-  });
-}
-
-// Friend & Chat System
-$('addFriend').onclick = async () => {
-  const name = $('friendName').value.trim().toLowerCase();$('friendErr').textContent = '';
-  if (!name) return;
-  if (name === myName) return $('friendErr').textContent = "That's you!";
-  try {
-    const u = await db.collection('usernames').doc(name).get();
-    if (!u.exists) return $('friendErr').textContent = 'No user with that name';
-    const other = u.data().uid, id = [me.uid, other].sort().join('_');
-    const ex = await db.collection('friendships').doc(id).get();
-    if (ex.exists) return $('friendErr').textContent = 'Already added or pending';
-    await db.collection('friendships').doc(id).set({
-      users: [me.uid, other], from: me.uid, status: 'pending',
-      names: { [me.uid]: myName, [other]: name }
-    });
-    $('friendName').value = '';
-    $('friendErr').style.color = '#4caf50'; $('friendErr').textContent = 'Request sent!';
-    setTimeout(() => { $('friendErr').textContent = ''; $('friendErr').style.color = ''; }, 2500); } catch (e) {$('friendErr').textContent = e.message; }
-};
-
-function startFriends() {
-  unsubFriends = db.collection('friendships').where('users', 'array-contains', me.uid).onSnapshot(snap => {
-    const inc = [], out = [], ok = [];
-    snap.forEach(d => {
-      const f = d.data(), other = f.users.find(x => x !== me.uid), name = f.names[other];
-      const row = { id: d.id, name };
-      if (f.status === 'accepted') ok.push(row);
-      else if (f.from === me.uid) out.push(row); else inc.push(row);
-    });
-    let h = '';
-    if (inc.length) h += '<h3>Requests</h3>' + inc.map(r => `<div class="friend"><b>${esc(r.name)}</b><span><button class="mini ok" data-acc="${r.id}">✓</button> <button class="mini no" data-rej="${r.id}">✕</button></span></div>`).join('');
-    h += '<h3>Friends</h3>' + (ok.length ? ok.map(r => `<div class="friend ${currentChat === r.id ? 'sel' : ''}" data-chat="${r.id}" data-name="${esc(r.name)}"><b>${esc(r.name)}</b></div>`).join('') : '<div class="empty">No friends yet</div>');
-    if (out.length) h += '<h3>Pending</h3>' + out.map(r => `<div class="friend"><span>${esc(r.name)}</span><small>waiting…</small></div>`).join('');
-    $('friendList').innerHTML = h;
-    
-    $('friendList').querySelectorAll('[data-acc]').forEach(b => b.onclick = () => db.collection('friendships').doc(b.dataset.acc).update({ status: 'accepted' }));
-    $('friendList').querySelectorAll('[data-rej]').forEach(b => b.onclick = () => db.collection('friendships').doc(b.dataset.rej).delete());$('friendList').querySelectorAll('[data-chat]').forEach(b => b.onclick = () => openChat(b.dataset.chat, b.dataset.name));
-  });
-}
-
-function openChat(id, name) {
-  if(unsubMsgs) unsubMsgs();
-  currentChat = id;
-  $('chatGrid').classList.add('open');$('chatTitle').textContent = '💬 ' + name;
-  $('msgInput').disabled = $('sendBtn').disabled =$('attachBtn').disabled = false;
-  
-  unsubMsgs = db.collection('friendships').doc(id).collection('messages').orderBy('ts').limitToLast(50).onSnapshot(snap => {
-    const box = $('msgs'); let h = '';
-    snap.forEach(d => {
-      const m = d.data(), mine = m.from === me.uid, t = m.ts ? m.ts.toDate() : new Date();
-      h += `<div class="msg ${mine ? 'out' : 'in'}">${esc(m.text || '')}<span>${t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>`;
-    });
-    box.innerHTML = h || '<div class="empty">Say hi 👋</div>';
-    box.scrollTop = box.scrollHeight;
-  });
-}
-
-$('backBtn').onclick = () =>$('chatGrid').classList.remove('open');
-
-async function sendMsg() {
-  const t = $('msgInput').value.trim();
-  if (!t || !currentChat) return;
-  const data = { from: me.uid, text: t, ts: TS() };
-  $('msgInput').value = '';
-  await db.collection('friendships').doc(currentChat).collection('messages').add(data);
-}
-$('sendBtn').onclick = sendMsg;
-$('msgInput').onkeydown = e => { if (e.key === 'Enter') sendMsg(); };
-</script>
-</body>
-</html>
+      if (confirm('Delete this entry?')) db.collection('users').doc(me.uid).collection('diary').doc(b
